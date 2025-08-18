@@ -86,7 +86,8 @@ def separate_routes(opType: str):
                 json.dump(geojson, f, indent=4)
 
 
-def routes_all_geo(planeType: str, distance: int, iatacode: str):
+def pre_routes_all_geo(planeType: str, distance: int):
+
     df = pd.read_excel(url, sheet_name=planeType)
     Routes = df["Route"].tolist()
     """All geojson"""
@@ -155,5 +156,5 @@ def routes_all_geo(planeType: str, distance: int, iatacode: str):
 
 if __name__ == "__main__":
     # separate_routes("cargo")
-    separate_routes("commercial")
-    # routes_all_geo("A380", 29000, "CHC")
+    # separate_routes("commercial")
+    pre_routes_all_geo("A380", 29000)

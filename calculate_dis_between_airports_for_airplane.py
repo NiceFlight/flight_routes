@@ -59,57 +59,59 @@ def cal_dis_btn_apts_for_ap(runway: int, airplaneType: str, range: int):
         writer.writerows(output_list)
 
 
-def my_hubs_to_every_apts_distance(hub: str, airplaneType: str, Reqrunway: int, range: int):
+def my_hubs_to_every_apts_distance(airplaneType: str, Reqrunway: int, range: int):
+
+    startList = ["TPE", "PER", "CHC", "HNL", "VIE", "AUH", "ORD", "SCL", "JNB", "KEF", "SIN"]
+
     """Find my hub's to every airports distance"""
     url = r"D:/NiceFlight/Airline_Manager/flight_plan.xlsx"
     airportsDF = pd.read_excel(url, header=0, sheet_name="airport")
 
-    start_airport = airportsDF[airportsDF["IATA Code"].str.strip() == hub]
-    # print(start_airport)
-    start_IATA = start_airport["IATA Code"].str.strip().values[0]
-    start_Lat = start_airport["Lat"].values[0]
-    start_Lng = start_airport["Lng"].values[0]
-    # print(start_IATA, start_Lat, start_Lng)
-
-    selectAirports = []
-    for airport in airportsDF.iloc:  # df to list
-        if int(airport["Max Runway(ft)"]) >= Reqrunway:
-            selectAirports.append(airport.tolist())
-    # print(selectAirports)
-
     output_list1 = []
     output_list2 = []
-    for i in selectAirports:
-        end_IATA = i[5].strip()
-        end_Lat = i[7]
-        end_Lng = i[8]
-        if start_IATA == end_IATA:
-            continue
+    for s in startList:
+        start_airport = airportsDF[airportsDF["IATA Code"].str.strip() == s]
+        # print(start_airport)
+        start_IATA = start_airport["IATA Code"].str.strip().values[0]
+        start_Lat = start_airport["Lat"].values[0]
+        start_Lng = start_airport["Lng"].values[0]
+        # print(start_IATA, start_Lat, start_Lng)
 
-        # model: sphere
-        geod = Geodesic(6371000, 0)
-        line = geod.InverseLine(start_Lat, start_Lng, end_Lat, end_Lng)
-        distance = line.s13 / 1000  # Convert to kilometers
+        selectAirports = []
+        for airport in airportsDF.iloc:  # df to list
+            if int(airport["Max Runway(ft)"]) >= Reqrunway and airport["IATA Code"] != s:
+                selectAirports.append(airport.tolist())
+        # print(selectAirports)
 
-        if float(range * 0.9) <= distance <= float(range):
-            print(f"{start_IATA}-{end_IATA} - Distance: {round(distance)} km")
-            output_list1.append((f"{start_IATA}-{end_IATA}", round(distance)))
+        for i in selectAirports:
+            end_IATA = i[5].strip()
+            end_Lat = i[7]
+            end_Lng = i[8]
+            if start_IATA == end_IATA:
+                continue
 
-        output_list1 = sorted(output_list1, key=lambda x: x[1], reverse=True)  # sorted output_list1
+            # model: sphere
+            geod = Geodesic(6371000, 0)
+            line = geod.InverseLine(start_Lat, start_Lng, end_Lat, end_Lng)
+            distance = line.s13 / 1000  # Convert to kilometers
 
-        if float(range * 2 * 0.6) <= distance <= float(range * 2):
-            print(f"{start_IATA}-{end_IATA} - Distance: {round(distance)} km")
-            output_list2.append((f"{start_IATA}-{end_IATA}", round(distance)))
+            if float(range * 0.9) <= distance <= float(range):
+                print(f"{start_IATA}-{end_IATA} - Distance: {round(distance)} km")
+                output_list1.append((f"{start_IATA}-{end_IATA}", round(distance)))
 
-        output_list2 = sorted(output_list2, key=lambda x: x[1], reverse=True)  # sorted output_list2
+            output_list1 = sorted(output_list1, key=lambda x: x[1], reverse=True)  # sorted output_list1
 
-    with open(
-        os.path.join("csv_files", f"The_distance_of_{hub}_to_suitable_airports_for_{airplaneType}_{range}.csv"), "w", encoding="utf-8", newline=""
-    ) as f:
+            if float(range * 2 * 0.6) <= distance <= float(range * 2):
+                print(f"{start_IATA}-{end_IATA} - Distance: {round(distance)} km")
+                output_list2.append((f"{start_IATA}-{end_IATA}", round(distance)))
+
+            output_list2 = sorted(output_list2, key=lambda x: x[1], reverse=True)  # sorted output_list2
+
+    with open(os.path.join("csv_files", f"The_distance_to_suitable_airports_for_{airplaneType}_{range}.csv"), "w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
         writer.writerows(output_list1)
     with open(
-        os.path.join("csv_files", f"The_distance_of_{hub}_to_suitable_airports_for_{airplaneType}_{range*2}.csv"), "w", encoding="utf-8", newline=""
+        os.path.join("csv_files", f"The_distance_to_suitable_airports_for_{airplaneType}_{range*2}.csv"), "w", encoding="utf-8", newline=""
     ) as f:
         writer = csv.writer(f)
         writer.writerows(output_list2)
@@ -118,4 +120,4 @@ def my_hubs_to_every_apts_distance(hub: str, airplaneType: str, Reqrunway: int, 
 if __name__ == "__main__":
     # cal_dis_btn_apts_for_ap(11800, "Concorde", 7500)
     # cal_dis_btn_apts_for_ap(9680, "A380", 14500)
-    my_hubs_to_every_apts_distance("CHC", "A380", 9680, 14500)
+    my_hubs_to_every_apts_distance("A380", 9680, 14500)
