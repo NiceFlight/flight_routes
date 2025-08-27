@@ -3,6 +3,7 @@ import pandas as pd
 from geographiclib.geodesic import Geodesic
 import time
 import os
+from openpyxl import load_workbook
 
 
 def cal_dis_btn_apts_for_ap(runway: int, airplaneType: str, range: int):
@@ -110,14 +111,42 @@ def my_hubs_to_every_apts_distance(airplaneType: str, Reqrunway: int, range: int
     with open(os.path.join("csv_files", f"The_distance_to_suitable_airports_for_{airplaneType}_{range}.csv"), "w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
         writer.writerows(output_list1)
-    with open(
-        os.path.join("csv_files", f"The_distance_to_suitable_airports_for_{airplaneType}_{range*2}.csv"), "w", encoding="utf-8", newline=""
-    ) as f:
-        writer = csv.writer(f)
-        writer.writerows(output_list2)
+
+
+    wb = load_workbook(os.path.join("D:\\", "NiceFlight", "Airline_Manager", "flight_plan.xlsx"))
+    
+    sheet_10400 = wb.create_sheet(f"{airplaneType}_{range}")
+    sheet_20800 = wb.create_sheet(f"{airplaneType}_{range*2}")
+    headers = ["Route", "Distance"]
+
+    for col_idx, header in enumerate(headers, start=1):
+        sheet_10400.cell(row=1, column=col_idx, value=header)
+
+    for row_idx, row_data in enumerate(output_list1, start=2):
+        for col_idx, value in enumerate(row_data, start=1):
+            sheet_10400.cell(row=row_idx, column=col_idx, value=value)
+            
+    for col_idx, header in enumerate(headers, start=1):
+        sheet_20800.cell(row=1, column=col_idx, value=header)
+
+    for row_idx, row_data in enumerate(output_list2, start=2):
+        for col_idx, value in enumerate(row_data, start=1):
+            sheet_20800.cell(row=row_idx, column=col_idx, value=value)
+
+    wb.save(os.path.join("D:\\", "NiceFlight", "Airline_Manager", "flight_plan.xlsx"))
+
+    # with open(
+    #     os.path.join("csv_files", f"The_distance_to_suitable_airports_for_{airplaneType}_{range*2}.csv"), "w", encoding="utf-8", newline=""
+    # ) as f:
+    #     writer = csv.writer(f)
+    #     writer.writerows(output_list2)
+
+
+
+            
 
 
 if __name__ == "__main__":
     # cal_dis_btn_apts_for_ap(11800, "Concorde", 7500)
     # cal_dis_btn_apts_for_ap(9680, "A380", 14500)
-    my_hubs_to_every_apts_distance("A380", 9680, 14500)
+    my_hubs_to_every_apts_distance("A380F", 9680, 10400)

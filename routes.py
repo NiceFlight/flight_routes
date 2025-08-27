@@ -157,4 +157,4 @@ def pre_routes_all_geo(planeType: str, distance: int):
 if __name__ == "__main__":
     # separate_routes("cargo")
     # separate_routes("commercial")
-    pre_routes_all_geo("A380", 29000)
+    pre_routes_all_geo("A380F_20800", 20800)
