@@ -4,60 +4,72 @@ from geographiclib.geodesic import Geodesic
 import time
 import os
 from openpyxl import load_workbook
+import json
 
 
 def cal_dis_btn_apts_for_ap(runway: int, airplaneType: str, range: int):
     url = r"D:/NiceFlight/Airline_Manager/flight_plan.xlsx"
-    df = pd.read_excel(url, header=0, sheet_name="airport")
+    df = pd.read_excel(url, header=0, sheet_name="airportsData")
+    json_data = df.to_json(orient="records", force_ascii=False, indent=4)
+    json_data = json.loads(json_data)
 
     selectAirports = []
-    for airport in df.iloc:  # df to list
-        if int(airport["Max Runway(ft)"]) >= runway:
-            selectAirports.append(airport.tolist())
+    for _ in json_data:
+        if int(_["Max Runway(ft)"]) >= runway:
+            selectAirports.append(_)
 
     _startAirport = ""
     _endAirport = ""
     dis = 0
     output_list = []
+    f_list = []
 
-    for i_index, i in enumerate(selectAirports):
-        for j_index, j in enumerate(selectAirports):
-            if j_index <= i_index:
+    for i in selectAirports:
+        for j in selectAirports:
+            if i["Id"] == j["Id"]:
                 continue
-            startAirport = i[1].strip()
-            startIATA = i[5].strip()
-            start_lat = float(i[7])
-            start_lng = float(i[8])
+            startAirport = i["Name"].strip()
+            startIATA = i["IATA Code"].strip()
+            start_lat = float(i["Lat"])
+            start_lng = float(i["Lng"])
 
-            endAirport = j[1].strip()
-            endIATA = j[5].strip()
-            end_lat = float(j[7])
-            end_lng = float(j[8])
-            # print(startAirport, (start_lat, start_lng))
+            endAirport = j["Name"].strip()
+            endIATA = j["IATA Code"].strip()
+            end_lat = float(j["Lat"])
+            end_lng = float(j["Lng"])
+            # route = sorted([startIATA, endIATA])
+
+            # routes.append(route)
+            # print(f"{startAirport}, {startIATA}({start_lat}, {start_lng})-{endAirport}, {endIATA}({end_lat}, {end_lng})")
 
             # model: sphere
             geod = Geodesic(6371000, 0)
             line = geod.InverseLine(start_lat, start_lng, end_lat, end_lng)
             distance = line.s13 / 1000  # Convert to kilometers
-            print(f"{startAirport}-{endAirport} - Distance: {distance:.4f} km")
 
             # calculate the limit range of the plane
-            if range * 2 * 0.6 < distance <= range * 2:
-                output_list.append((startIATA, endIATA, round(distance), startAirport, endAirport))
+            if 18500 < distance:
+                print(f"{startAirport}-{endAirport} - Distance: {int(distance)} km")
+                output_list.append([sorted([startIATA, endIATA]), int(distance), sorted([startAirport, endAirport])])
+
+                for _ in output_list:
+                    if _ not in f_list:
+                        f_list.append(_)
 
             # find the Max range of the plane
             if distance > dis:
                 dis = distance
                 _startAirport = startAirport
                 _endAirport = endAirport
+
     print(f"The most far airports for {airplaneType} are {_startAirport} and {_endAirport}.\nThe distance is {dis} km!")
 
     # sortd data
-    output_list = sorted(output_list, key=lambda x: x[2], reverse=True)
+    f_list = sorted(f_list, key=lambda x: x[1], reverse=True)
 
-    with open(f"The_distance_of_two_airports_for_{airplaneType}.csv", "w", encoding="utf-8", newline="") as f:
+    with open(f"csv_files/The_distance_of_two_airports_for_{airplaneType}.csv", "w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
-        writer.writerows(output_list)
+        writer.writerows(f_list)
 
 
 def my_hubs_to_every_apts_distance(airplaneType: str, ReqRunway: int, range: int):
@@ -66,7 +78,7 @@ def my_hubs_to_every_apts_distance(airplaneType: str, ReqRunway: int, range: int
 
     """Find my hub's to every airports distance"""
     url = r"D:/NiceFlight/Airline_Manager/flight_plan.xlsx"
-    airportsDF = pd.read_excel(url, header=0, sheet_name="airport")
+    airportsDF = pd.read_excel(url, header=0, sheet_name="airportsData")
 
     output_list1 = []
     output_list2 = []
@@ -103,7 +115,7 @@ def my_hubs_to_every_apts_distance(airplaneType: str, ReqRunway: int, range: int
 
             output_list1 = sorted(output_list1, key=lambda x: x[1], reverse=True)  # sorted output_list1
 
-            if float(range * 2 * 0.6) <= distance <= float(range * 2):
+            if 18500 <= distance:
                 print(f"{start_IATA}-{end_IATA} - Distance: {round(distance)} km")
                 output_list2.append((f"{start_IATA}-{end_IATA}", round(distance)))
 

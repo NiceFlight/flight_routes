@@ -5,7 +5,7 @@ from geographiclib.geodesic import Geodesic
 
 url = r"D:/NiceFlight/Airline_Manager/flight_plan.xlsx"
 
-airportsDF = pd.read_excel(url, sheet_name=4)
+airportsDF = pd.read_excel(url, sheet_name="airportsData")
 
 
 def separate_routes(opType: str):
@@ -13,9 +13,12 @@ def separate_routes(opType: str):
     df = pd.read_excel(url, sheet_name=opType)
     Routes = df["Route"].tolist()
 
+    end_list = []
     for data in Routes:
         start_point = data[:3]
         end_point = data[-3:]
+
+        end_list.append(end_point)
 
         start_lat = airportsDF[airportsDF["IATA Code"].str.strip() == start_point]["Lat"].values[0]
         start_lng = airportsDF[airportsDF["IATA Code"].str.strip() == start_point]["Lng"].values[0]
@@ -84,6 +87,7 @@ def separate_routes(opType: str):
         if not os.path.exists(f"{dirfile}/{start_point}-{end_point}.geojson"):
             with open(f"{dirfile}/{start_point}-{end_point}.geojson", "w") as f:
                 json.dump(geojson, f, indent=4)
+    print(end_list)
 
 
 def pre_routes_all_geo(planeType: str):
@@ -156,6 +160,6 @@ def pre_routes_all_geo(planeType: str):
 
 if __name__ == "__main__":
     # separate_routes("cargo")
-    # separate_routes("commercial")
-    pre_routes_all_geo("A380_14500")
-    pre_routes_all_geo("A380_29000")
+    separate_routes("commercial")
+    # pre_routes_all_geo("A380_14500")
+    # pre_routes_all_geo("A380_29000")
