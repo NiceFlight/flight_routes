@@ -1,42 +1,43 @@
+import json
 import pandas as pd
 from geographiclib.geodesic import Geodesic
 import time
 
 
-startTime = time.time()
-url = r"D:/NiceFlight/Airline_Manager/flight_plan.xlsx"
+# startTime = time.time()
+# url = r"D:/NiceFlight/Airline_Manager/flight_plan.xlsx"
 
-df = pd.read_excel(url, header=0, sheet_name="airport")
-# print(airports)
+# df = pd.read_excel(url, header=0, sheet_name="airport")
+# # print(airports)
 
-selectAirports = []
-for airport in df.iloc:
-    if int(airport["Max Runway(ft)"]) >= 9680:
-        selectAirports.append(airport.tolist())
+# selectAirports = []
+# for airport in df.iloc:
+#     if int(airport["Max Runway(ft)"]) >= 9680:
+#         selectAirports.append(airport.tolist())
 
-print(len(selectAirports))
+# print(len(selectAirports))
 
-hubList = [
-    ["TPE", 25.07770000000000, 121.2330020000000000],
-    ["SIN", 1.35019000000000, 103.9940030000000000],
-    ["PER", -31.94029998779290, 115.9670028686520000],
-    ["ORD", 41.97860000000000, -87.9048000000000000],
-    ["CHC", -43.48939895629880, 172.5319976806640000],
-    ["KEF", 63.98500061035200, -22.6056003570560000],
-    ["JNB", -26.13920000000000, 28.2460000000000000],
-    ["HNL", 21.32062000000000, -157.9242280000000000],
-    ["VIE", 48.11029815673800, 16.5697002410890000],
-    ["AUH", 24.43300056457510, 54.6511001586914000],
-    ["SCL", -33.39300155639640, -70.7857971191406000],
-    ["AAP", -16.34110069270000, -71.5830993652000000],
-]
-_startAirport = ""
-_endAirport = ""
-dis = 0
-output_list = []
+# hubList = [
+#     ["TPE", 25.07770000000000, 121.2330020000000000],
+#     ["SIN", 1.35019000000000, 103.9940030000000000],
+#     ["PER", -31.94029998779290, 115.9670028686520000],
+#     ["ORD", 41.97860000000000, -87.9048000000000000],
+#     ["CHC", -43.48939895629880, 172.5319976806640000],
+#     ["KEF", 63.98500061035200, -22.6056003570560000],
+#     ["JNB", -26.13920000000000, 28.2460000000000000],
+#     ["HNL", 21.32062000000000, -157.9242280000000000],
+#     ["VIE", 48.11029815673800, 16.5697002410890000],
+#     ["AUH", 24.43300056457510, 54.6511001586914000],
+#     ["SCL", -33.39300155639640, -70.7857971191406000],
+#     ["AAP", -16.34110069270000, -71.5830993652000000],
+# ]
+# _startAirport = ""
+# _endAirport = ""
+# dis = 0
+# output_list = []
 
 
-"""Most far of two airports"""
+"""Most far of two airports for A380"""
 # for i_index, i in enumerate(selectAirports):
 #     for j_index, j in enumerate(selectAirports):
 #         if j_index <= i_index:
@@ -108,3 +109,47 @@ output_list = []
 # #     "The_distance_of_hubs_to_every_airports_for_A380.csv", "w", encoding="utf-8"
 # # ) as f:
 # #     f.writelines(output_list)
+
+
+"""The most far of two airports"""
+with open("airportsData.json", "r", encoding="utf-8") as f:
+    ar_data = json.load(f)
+# print(ar_data)
+
+startPoint = ""
+desPoint = ""
+dis = 0
+seen_pairs = set()
+
+_startPoint = ""
+_desPoint = ""
+
+for i in ar_data:
+    for j in ar_data:
+        startPoint = i["IATA Code"]
+        startLat = float(i["Lat"])
+        startLng = float(i["Lng"])
+        desPoint = j["IATA Code"]
+        desLat = float(j["Lat"])
+        desLng = float(j["Lng"])
+
+        pair = tuple(sorted((startPoint.strip(), desPoint.strip())))
+
+        if startPoint == desPoint or pair in seen_pairs:
+            continue
+        seen_pairs.add(pair)
+
+        geod = Geodesic.WGS84
+        line = geod.InverseLine(startLat, startLng, desLat, desLng)
+        distance = line.s13 / 1000  # Convert to kilometers
+
+        if distance > dis:
+            dis = distance
+            _startPoint = startPoint
+            _desPoint = desPoint
+            _startAirport = i["Name"]
+            _desAirport = j["Name"]
+            print(f"{_startPoint}-{_desPoint} - {dis:.4f} km.")
+
+
+print(f"The Most far of two airports are {_startAirport}({_startPoint}) and {_desAirport}({_desPoint}), the distance is {dis:.4f} km")

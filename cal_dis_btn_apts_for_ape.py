@@ -74,7 +74,7 @@ def cal_dis_btn_apts_for_ap(runway: int, airplaneType: str, range: int):
 
 def my_hubs_to_every_apts_distance(airplaneType: str, ReqRunway: int, range: int):
 
-    startList = ["TPE", "PER", "CHC", "HNL", "VIE", "AUH", "ORD", "SCL", "JNB", "KEF", "SIN"]
+    startList = ["AQP", "TPE", "PER", "CHC", "HNL", "VIE", "AUH", "ORD", "SCL", "JNB", "KEF", "SIN"]
 
     """Find my hub's to every airports distance"""
     url = r"D:/NiceFlight/Airline_Manager/flight_plan.xlsx"

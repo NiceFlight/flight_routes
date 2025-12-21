@@ -3,6 +3,7 @@ import os
 import pandas as pd
 from geographiclib.geodesic import Geodesic
 
+
 url = r"D:/NiceFlight/Airline_Manager/flight_plan.xlsx"
 
 airportsDF = pd.read_excel(url, sheet_name="airportsData")
@@ -87,7 +88,7 @@ def separate_routes(opType: str):
         if not os.path.exists(f"{dirfile}/{start_point}-{end_point}.geojson"):
             with open(f"{dirfile}/{start_point}-{end_point}.geojson", "w") as f:
                 json.dump(geojson, f, indent=4)
-    print(end_list)
+    # print(end_list)
 
 
 def pre_routes_all_geo(planeType: str):
