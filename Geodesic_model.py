@@ -5,14 +5,14 @@ from geographiclib.geodesic import Geodesic
 geod = Geodesic.WGS84  # type: ignore
 line = geod.InverseLine(-16.34110069270000, -71.5830993652000000, 16.04389953613280, 108.1989974975580000)
 distance = line.s13 / 1000  # Convert to kilometers
-print(f"WGS84 Distance: {distance:.4f} km")
+print(f"WGS84 Distance: {distance:.10f} km")
 
 """GRS80"""
 geod = Geodesic(6378137, 1 / 298.257222101)  # type: ignore
 # geod = Geodesic.GRS80  # type: ignore
 line = geod.InverseLine(-16.34110069270000, -71.5830993652000000, 16.04389953613280, 108.1989974975580000)
 distance = line.s13 / 1000  # Convert to kilometers
-print(f"GRS80 Distance: {distance:.4f} km")
+print(f"GRS80 Distance: {distance:.10f} km")
 
 """England Airy 1830"""
 geod = Geodesic(6377563.396, 1 / 299.3249646)  # type: ignore
@@ -39,7 +39,7 @@ distance = line.s13 / 1000  # Convert to kilometers
 print(f"sphere Distance: {distance:.4f} km")
 
 """sphere"""
-geod = Geodesic.SPHERE  # type: ignore  sphere
-line = geod.InverseLine(-16.34110069270000, -71.5830993652000000, 16.04389953613280, 108.1989974975580000)
-distance = line.s13 / 1000  # Convert to kilometers
-print(f"sphere Distance: {distance:.4f} km")
+# geod = Geodesic.SPHERE  # type: ignore  sphere
+# line = geod.InverseLine(-16.34110069270000, -71.5830993652000000, 16.04389953613280, 108.1989974975580000)
+# distance = line.s13 / 1000  # Convert to kilometers
+# print(f"sphere Distance: {distance:.4f} km")
